@@ -1,3 +1,7 @@
 Makefile
-envs_poc.tfvars
+*.tfvars
 *.zip
+*.lock
+*.tfstate
+.terraform*
+.terraform.*
