@@ -1,2 +1,3 @@
 Makefile
-infra/envs_poc.tfvars
+envs_poc.tfvars
+*.zip
