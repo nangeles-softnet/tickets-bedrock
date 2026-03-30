@@ -48,3 +48,9 @@ variable "properties_support_agent" {
   type = map(string)
   description = "Propiedades de empaquetado y nombre de la Lambda de soporte"
 }
+
+variable "support_layer_filename" {
+  type        = string
+  description = "Nombre del archivo zip de la capa de dependencias"
+  default     = "support-layer.zip"
+}

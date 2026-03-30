@@ -1,3 +1,10 @@
+resource "aws_lambda_layer_version" "support_agent_layer" {
+  filename            = var.support_layer_filename
+  layer_name          = "support-agent-dependencies"
+  compatible_runtimes = ["python3.11"]
+  source_code_hash    = filebase64sha256(var.support_layer_filename)
+}
+
 module "lambda_support_agent" {
   source      = "./modules/lambda_function"
   name        = var.properties_support_agent.name
@@ -6,6 +13,9 @@ module "lambda_support_agent" {
   handler     = var.properties_support_agent.handler
   role_arn    = aws_iam_role.lambda_support_role.arn
   api_arn     = aws_api_gateway_rest_api.tickets_api.execution_arn
+
+  # Capa de dependencias
+  layers = [aws_lambda_layer_version.support_agent_layer.arn]
 
   # Mapeo de EFS opcional (solo si se provee)
   efs_arn        = var.efs_arn

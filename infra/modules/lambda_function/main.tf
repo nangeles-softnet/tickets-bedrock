@@ -23,6 +23,8 @@ resource "aws_lambda_function" "this" {
     variables = var.envs
   }
 
+  layers = var.layers
+
   dynamic "file_system_config" {
     for_each = var.efs_arn != "" ? [1] : []
     content {
