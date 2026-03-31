@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Login from './components/Login';
+import Register from './components/Register';
 import SupportDashboard from './components/SupportDashboard';
 
 // === CONFIGURACIÓN GLOBAL (Reemplazar después de aplicar Terraform) ===
@@ -12,6 +13,7 @@ export const CONFIG = {
 
 function App() {
   const [token, setToken] = useState(null);
+  const [view, setView] = useState('login'); // login | register
 
   const handleLoginSuccess = (jwtToken) => {
     setToken(jwtToken);
@@ -27,7 +29,11 @@ function App() {
       <hr style={{ border: 'none', borderTop: '1px solid #eee', marginBottom: '20px' }} />
       
       {!token ? (
-        <Login onLoginSuccess={handleLoginSuccess} config={CONFIG} />
+        view === 'login' ? (
+          <Login onLoginSuccess={handleLoginSuccess} onToggleView={() => setView('register')} config={CONFIG} />
+        ) : (
+          <Register onToggleView={() => setView('login')} config={CONFIG} />
+        )
       ) : (
         <SupportDashboard token={token} config={CONFIG} onLogout={handleLogout} />
       )}

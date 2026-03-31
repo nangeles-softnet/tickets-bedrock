@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CognitoUserPool, AuthenticationDetails, CognitoUser } from 'amazon-cognito-identity-js';
 
-const Login = ({ onLoginSuccess, config }) => {
+const Login = ({ onLoginSuccess, onToggleView, config }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -56,6 +56,9 @@ const Login = ({ onLoginSuccess, config }) => {
         />
         <button type="submit" style={{ padding: '10px', backgroundColor: '#007BFF', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
           Entrar
+        </button>
+        <button type="button" onClick={onToggleView} style={{ background: 'none', border: 'none', color: '#007BFF', cursor: 'pointer', fontSize: '14px' }}>
+          ¿No tienes cuenta? Regístrate aquí
         </button>
       </form>
       {error && <p style={{ color: 'red', marginTop: '15px' }}>{error}</p>}
