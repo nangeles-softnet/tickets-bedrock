@@ -5,3 +5,5 @@ Makefile
 *.tfstate
 .terraform*
 .terraform.*
+
+frontend/node_modules
