@@ -15,3 +15,8 @@ output "custom_api_url" {
   value       = "https://${var.custom_domain_name}"
   description = "URL personalizada para el API de tickets"
 }
+
+output "custom_api_url" {
+  value       = "https://${var.custom_domain_name}"
+  description = "URL personalizada para el API de tickets"
+}
