@@ -54,3 +54,18 @@ variable "support_layer_filename" {
   description = "Nombre del archivo zip de la capa de dependencias"
   default     = "support-layer.zip"
 }
+
+variable "zone_id" {
+  type        = string
+  description = "ID de la zona de Route 53"
+}
+
+variable "custom_domain_name" {
+  type        = string
+  description = "Nombre del dominio personalizado para el API"
+}
+
+variable "acm_certificate_arn" {
+  type        = string
+  description = "ARN del certificado ACM para el dominio personalizado"
+}
