@@ -10,3 +10,8 @@ output "cognito_user_pool_id" {
 output "cognito_client_id" {
   value = aws_cognito_user_pool_client.tickets_spa_client.id
 }
+
+output "custom_api_url" {
+  value       = "https://${var.custom_domain_name}"
+  description = "URL personalizada para el API de tickets"
+}
