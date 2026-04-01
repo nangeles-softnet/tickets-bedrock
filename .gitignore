@@ -7,3 +7,4 @@ Makefile
 .terraform.*
 
 frontend/node_modules
+backend/lambdas/support_agent/python/*
