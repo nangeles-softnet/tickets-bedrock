@@ -1,0 +1,100 @@
+name: "Terraform Plan (Amazon)"
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches-ignore: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+env:
+  TF_DIR: infra
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  build-and-validate:
+    name: Build, Validate & Plan
+    runs-on: ubuntu-latest
+    env:
+      HAS_AWS_CREDS: ${{ secrets.AWS_ROLE_ARN && secrets.AWS_REGION && 'true' || 'false' }}
+      HAS_TFVARS: ${{ secrets.TF_VARS_FILE && 'true' || 'false' }}
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Build Lambda package and layer
+        run: |
+          set -euo pipefail
+          rm -f infra/support-layer.zip infra/support-agent.zip infra/support_agent.zip
+          rm -rf infra/.build/layer
+          mkdir -p infra/.build/layer/python
+
+          python -m pip install --upgrade pip
+          pip install -r backend/lambdas/support_agent/requirements.txt -t infra/.build/layer/python
+
+          (cd infra/.build/layer && zip -rq ../../support-layer.zip python)
+          zip -jq infra/support-agent.zip backend/lambdas/support_agent/lambda_function.py
+          cp infra/support-agent.zip infra/support_agent.zip
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS Credentials (OIDC)
+        if: env.HAS_AWS_CREDS == 'true'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Cache Terraform
+        uses: actions/cache@v4
+        with:
+          path: infra/.terraform
+          key: ${{ runner.os }}-tf-aws-${{ hashFiles('infra/**/*.tf') }}
+
+      - name: Terraform Init
+        if: env.HAS_AWS_CREDS == 'true'
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform init
+
+      - name: Terraform Format Check
+        if: env.HAS_AWS_CREDS == 'true'
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: Terraform Validate
+        if: env.HAS_AWS_CREDS == 'true'
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform validate
+
+      - name: Reconstruct tfvars
+        if: env.HAS_AWS_CREDS == 'true' && env.HAS_TFVARS == 'true'
+        working-directory: ${{ env.TF_DIR }}
+        run: echo "${TF_VARS_CONTENT}" > envs_poc.tfvars
+        env:
+          TF_VARS_CONTENT: ${{ secrets.TF_VARS_FILE }}
+
+      - name: Terraform Plan
+        if: env.HAS_AWS_CREDS == 'true'
+        working-directory: ${{ env.TF_DIR }}
+        run: |
+          if [ -f envs_poc.tfvars ] && [ -s envs_poc.tfvars ]; then
+            terraform plan -var-file=envs_poc.tfvars -input=false -no-color
+          else
+            terraform plan -input=false -no-color
+          fi
