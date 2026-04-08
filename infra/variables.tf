@@ -54,3 +54,15 @@ variable "support_layer_filename" {
   description = "Nombre del archivo zip de la capa de dependencias"
   default     = "support-layer.zip"
 }
+
+variable "custom_domain_name" {
+  type        = string
+  description = "Variable opcional heredada del tfvars compartido (no usada en este stack)"
+  default     = ""
+}
+
+variable "zone_id" {
+  type        = string
+  description = "Variable opcional heredada del tfvars compartido (no usada en este stack)"
+  default     = ""
+}
