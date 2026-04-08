@@ -66,3 +66,9 @@ variable "zone_id" {
   description = "Variable opcional heredada del tfvars compartido (no usada en este stack)"
   default     = ""
 }
+
+variable "acm_certificate_arn" {
+  type        = string
+  description = "Variable opcional heredada del tfvars compartido (no usada en este stack)"
+  default     = ""
+}
