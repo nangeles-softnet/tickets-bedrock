@@ -24,9 +24,9 @@ module "lambda_support_agent" {
   layers = [aws_lambda_layer_version.support_agent_layer.arn]
 
   # Mapeo de EFS opcional (solo si se provee)
-  efs_arn        = var.efs_arn
-  efs_mount_path = var.efs_mount_path
-  subnet_ids     = var.vpc_subnet_ids
+  efs_arn            = var.efs_arn
+  efs_mount_path     = var.efs_mount_path
+  subnet_ids         = var.vpc_subnet_ids
   security_group_ids = var.vpc_security_group_ids
 
   # INYECCIÓN CERO HARDCODING

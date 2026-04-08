@@ -1,5 +1,5 @@
 output "api_gateway_url" {
-  value = "${aws_api_gateway_stage.poc_stage.invoke_url}/ticket"
+  value       = "${aws_api_gateway_stage.poc_stage.invoke_url}/ticket"
   description = "URL base para consultar peticiones de tickets desde la API"
 }
 

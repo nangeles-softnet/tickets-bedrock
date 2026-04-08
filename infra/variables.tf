@@ -45,7 +45,7 @@ variable "efs_mount_path" {
 }
 
 variable "properties_support_agent" {
-  type = map(string)
+  type        = map(string)
   description = "Propiedades de empaquetado y nombre de la Lambda de soporte"
 }
 
