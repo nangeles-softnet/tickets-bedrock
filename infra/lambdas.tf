@@ -5,10 +5,16 @@ resource "aws_lambda_layer_version" "support_agent_layer" {
   source_code_hash    = filebase64sha256(var.support_layer_filename)
 }
 
+locals {
+  support_agent_filename = fileexists(var.properties_support_agent.filename) ? var.properties_support_agent.filename : (
+    fileexists("support-agent.zip") ? "support-agent.zip" : "support_agent.zip"
+  )
+}
+
 module "lambda_support_agent" {
   source      = "./modules/lambda_function"
   name        = var.properties_support_agent.name
-  filename    = var.properties_support_agent.filename
+  filename    = local.support_agent_filename
   description = var.properties_support_agent.description
   handler     = var.properties_support_agent.handler
   role_arn    = aws_iam_role.lambda_support_role.arn
@@ -18,9 +24,9 @@ module "lambda_support_agent" {
   layers = [aws_lambda_layer_version.support_agent_layer.arn]
 
   # Mapeo de EFS opcional (solo si se provee)
-  efs_arn        = var.efs_arn
-  efs_mount_path = var.efs_mount_path
-  subnet_ids     = var.vpc_subnet_ids
+  efs_arn            = var.efs_arn
+  efs_mount_path     = var.efs_mount_path
+  subnet_ids         = var.vpc_subnet_ids
   security_group_ids = var.vpc_security_group_ids
 
   # INYECCIÓN CERO HARDCODING

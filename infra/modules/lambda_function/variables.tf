@@ -23,27 +23,27 @@ variable "api_arn" {
 }
 
 variable "envs" {
-  type = map(string)
+  type    = map(string)
   default = {}
 }
 
 variable "efs_arn" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "efs_mount_path" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "subnet_ids" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
 
 variable "security_group_ids" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
 

@@ -45,7 +45,7 @@ variable "efs_mount_path" {
 }
 
 variable "properties_support_agent" {
-  type = map(string)
+  type        = map(string)
   description = "Propiedades de empaquetado y nombre de la Lambda de soporte"
 }
 
@@ -53,4 +53,22 @@ variable "support_layer_filename" {
   type        = string
   description = "Nombre del archivo zip de la capa de dependencias"
   default     = "support-layer.zip"
+}
+
+variable "custom_domain_name" {
+  type        = string
+  description = "Variable opcional heredada del tfvars compartido (no usada en este stack)"
+  default     = ""
+}
+
+variable "zone_id" {
+  type        = string
+  description = "Variable opcional heredada del tfvars compartido (no usada en este stack)"
+  default     = ""
+}
+
+variable "acm_certificate_arn" {
+  type        = string
+  description = "Variable opcional heredada del tfvars compartido (no usada en este stack)"
+  default     = ""
 }
