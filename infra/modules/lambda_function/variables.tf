@@ -12,7 +12,9 @@ variable "description" {
 }
 
 variable "handler" {
-  type = string
+  type        = string
+  description = "Handler de Lambda (solo aplica a package_type Zip)"
+  default     = null
 }
 
 variable "role_arn" {
