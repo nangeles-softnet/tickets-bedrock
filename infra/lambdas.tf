@@ -1,8 +1,19 @@
+# Subir el ZIP optimizado del Layer a S3 primero
+resource "aws_s3_object" "support_layer_s3" {
+  bucket = aws_s3_bucket.artifacts.id
+  key    = "layers/${var.support_layer_filename}"
+  source = "${path.module}/${var.support_layer_filename}"
+  etag   = filemd5("${path.module}/${var.support_layer_filename}")
+}
+
 resource "aws_lambda_layer_version" "support_agent_layer" {
-  filename            = var.support_layer_filename
+  s3_bucket           = aws_s3_bucket.artifacts.id
+  s3_key              = aws_s3_object.support_layer_s3.key
+  s3_object_version   = aws_s3_object.support_layer_s3.version_id
   layer_name          = "support-agent-dependencies"
   compatible_runtimes = ["python3.11"]
-  source_code_hash    = filebase64sha256(var.support_layer_filename)
+
+  # Se elimina source_code_hash ya que usamos el versioning y etag de S3
 }
 
 locals {
