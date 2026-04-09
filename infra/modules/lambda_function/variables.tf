@@ -2,8 +2,9 @@ variable "name" {
   type = string
 }
 
-variable "filename" {
-  type = string
+variable "image_uri" {
+  type        = string
+  description = "URI de la imagen de ECR"
 }
 
 variable "description" {
