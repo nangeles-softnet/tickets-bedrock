@@ -4,16 +4,15 @@ resource "aws_cloudwatch_log_group" "this" {
 }
 
 resource "aws_lambda_function" "this" {
-  function_name    = var.name
-  filename         = var.filename
-  description      = var.description
-  handler          = var.handler
-  role             = var.role_arn
-  runtime          = "python3.11"
-  timeout          = 30
-  memory_size      = 1024
-  architectures    = ["x86_64"]
-  source_code_hash = filebase64sha256(var.filename)
+  function_name = var.name
+  description   = var.description
+  role          = var.role_arn
+  timeout       = 30
+  memory_size   = 1024
+  architectures = ["x86_64"]
+  
+  package_type  = "Image"
+  image_uri     = var.image_uri
 
   tracing_config {
     mode = "Active"
@@ -22,8 +21,6 @@ resource "aws_lambda_function" "this" {
   environment {
     variables = var.envs
   }
-
-  layers = var.layers
 
   dynamic "file_system_config" {
     for_each = var.efs_arn != "" ? [1] : []

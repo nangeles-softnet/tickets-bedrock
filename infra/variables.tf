@@ -49,10 +49,16 @@ variable "properties_support_agent" {
   description = "Propiedades de empaquetado y nombre de la Lambda de soporte"
 }
 
-variable "support_layer_filename" {
+variable "support_layer_core_filename" {
   type        = string
-  description = "Nombre del archivo zip de la capa de dependencias"
-  default     = "support-layer.zip"
+  description = "Nombre del archivo zip de la capa Core"
+  default     = "support-layer-core.zip"
+}
+
+variable "support_layer_pyarrow_filename" {
+  type        = string
+  description = "Nombre del archivo zip de la capa PyArrow"
+  default     = "support-layer-pyarrow.zip"
 }
 
 variable "custom_domain_name" {
