@@ -13,7 +13,6 @@ permissions:
 
 env:
   TF_DIR: infra
-  PYTHON_VERSION: "3.11"
 
 jobs:
   build-and-validate:
@@ -31,24 +30,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Build Lambda package and layer
+      - name: Build container image (PR validation)
         run: |
           set -euo pipefail
-          rm -f infra/support-layer.zip infra/support-agent.zip infra/support_agent.zip
-          rm -rf infra/.build/layer
-          mkdir -p infra/.build/layer/python
-
-          python -m pip install --upgrade pip
-          pip install -r backend/lambdas/support_agent/requirements.txt -t infra/.build/layer/python
-
-          (cd infra/.build/layer && zip -rq ../../support-layer.zip python)
-          zip -jq infra/support-agent.zip backend/lambdas/support_agent/lambda_function.py
-          cp infra/support-agent.zip infra/support_agent.zip
+          docker build -t tickets-support-agent:pr ./backend/lambdas/support_agent
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3

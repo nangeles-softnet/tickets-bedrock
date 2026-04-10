@@ -2,8 +2,9 @@ variable "name" {
   type = string
 }
 
-variable "filename" {
-  type = string
+variable "image_uri" {
+  type        = string
+  description = "URI de la imagen de ECR"
 }
 
 variable "description" {
@@ -11,7 +12,9 @@ variable "description" {
 }
 
 variable "handler" {
-  type = string
+  type        = string
+  description = "Handler de Lambda (solo aplica a package_type Zip)"
+  default     = null
 }
 
 variable "role_arn" {
