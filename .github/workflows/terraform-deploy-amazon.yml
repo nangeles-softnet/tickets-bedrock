@@ -62,7 +62,12 @@ jobs:
       - name: Ensure ECR repository exists
         if: env.HAS_AWS_CREDS == 'true'
         working-directory: ${{ env.TF_DIR }}
-        run: terraform apply -target=aws_ecr_repository.support_agent -input=false -auto-approve -no-color
+        run: |
+          if [ -f envs_poc.tfvars ] && [ -s envs_poc.tfvars ]; then
+            terraform apply -target=aws_ecr_repository.support_agent -var-file=envs_poc.tfvars -input=false -auto-approve -no-color
+          else
+            terraform apply -target=aws_ecr_repository.support_agent -input=false -auto-approve -no-color
+          fi
 
       - name: Get ECR repository URL
         if: env.HAS_AWS_CREDS == 'true'
