@@ -17,7 +17,6 @@ module "lambda_support_agent" {
   # INYECCIÓN CERO HARDCODING
   envs = {
     MODEL_ID       = var.model_id
-    AWS_REGION     = var.region
     DYNAMODB_TABLE = aws_dynamodb_table.tickets_history.name
     EFS_MOUNT_PATH = var.efs_mount_path
     COHERE_API_KEY = var.cohere_api_key
