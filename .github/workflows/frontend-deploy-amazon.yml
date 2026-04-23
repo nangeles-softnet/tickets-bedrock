@@ -1,0 +1,98 @@
+name: "Frontend Deploy (Amazon)"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-deploy-amazon.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: frontend-deploy-amazon-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  NODE_VERSION: "18"
+  FRONTEND_DIR: frontend
+  BUILD_DIR: frontend/build
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    env:
+      HAS_AWS_CREDS: ${{ secrets.AWS_ROLE_ARN && secrets.AWS_REGION && 'true' || 'false' }}
+      HAS_FRONTEND_TARGETS: ${{ secrets.S3_BUCKET && secrets.CLOUDFRONT_DISTRIBUTION_ID && 'true' || 'false' }}
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: ${{ env.FRONTEND_DIR }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: npm ci
+
+      - name: Build
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: npm run build
+        env:
+          CI: "false"
+
+      - name: Configure AWS Credentials (OIDC)
+        if: env.HAS_AWS_CREDS == 'true' && env.HAS_FRONTEND_TARGETS == 'true'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Sync static assets to S3 (long cache)
+        if: env.HAS_AWS_CREDS == 'true' && env.HAS_FRONTEND_TARGETS == 'true'
+        env:
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+        run: |
+          set -euo pipefail
+          aws s3 sync "${BUILD_DIR}/" "s3://${S3_BUCKET}/" \
+            --delete \
+            --exclude "*.html" \
+            --exclude "asset-manifest.json" \
+            --exclude "service-worker.js" \
+            --cache-control "public,max-age=31536000,immutable"
+
+      - name: Sync HTML & manifests to S3 (no cache)
+        if: env.HAS_AWS_CREDS == 'true' && env.HAS_FRONTEND_TARGETS == 'true'
+        env:
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+        run: |
+          set -euo pipefail
+          aws s3 sync "${BUILD_DIR}/" "s3://${S3_BUCKET}/" \
+            --exclude "*" \
+            --include "*.html" \
+            --include "asset-manifest.json" \
+            --include "service-worker.js" \
+            --cache-control "no-cache,no-store,must-revalidate"
+
+      - name: Invalidate CloudFront cache
+        if: env.HAS_AWS_CREDS == 'true' && env.HAS_FRONTEND_TARGETS == 'true'
+        env:
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          set -euo pipefail
+          aws cloudfront create-invalidation \
+            --distribution-id "${CLOUDFRONT_DISTRIBUTION_ID}" \
+            --paths "/index.html" "/asset-manifest.json" "/service-worker.js" "/static/*"
