@@ -111,6 +111,11 @@ jobs:
             terraform plan -input=false -no-color
           fi
 
+      - name: Import pre-existing AWS resources (fixed names)
+        if: env.HAS_AWS_CREDS == 'true'
+        working-directory: ${{ env.TF_DIR }}
+        run: bash scripts/terraform-import-preexisting.sh
+
       - name: Terraform Apply
         if: env.HAS_AWS_CREDS == 'true'
         working-directory: ${{ env.TF_DIR }}
