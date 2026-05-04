@@ -4,7 +4,7 @@ resource "random_id" "bucket_suffix" {
 
 resource "aws_s3_bucket" "artifacts" {
   bucket = "tickets-bedrock-artifacts-${random_id.bucket_suffix.hex}"
-  
+
   # For PoC purposes, we'll allow easy cleanup
   force_destroy = true
 

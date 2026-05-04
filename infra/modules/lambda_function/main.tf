@@ -10,9 +10,9 @@ resource "aws_lambda_function" "this" {
   timeout       = 30
   memory_size   = 1024
   architectures = ["x86_64"]
-  
-  package_type  = "Image"
-  image_uri     = var.image_uri
+
+  package_type = "Image"
+  image_uri    = var.image_uri
 
   tracing_config {
     mode = "Active"

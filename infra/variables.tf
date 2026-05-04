@@ -63,8 +63,14 @@ variable "support_layer_pyarrow_filename" {
 
 variable "custom_domain_name" {
   type        = string
-  description = "Variable opcional heredada del tfvars compartido (no usada en este stack)"
+  description = "FQDN público del API (sin https://). Si no está vacío, output api_gateway_url usa https://<este host><custom_domain_ticket_path> en lugar del execute-api.amazonaws.com."
   default     = ""
+}
+
+variable "custom_domain_ticket_path" {
+  type        = string
+  description = "Ruta bajo el dominio custom hasta el recurso /ticket (debe coincidir con el mapeo en API Gateway / CloudFront). Por defecto /poc/ticket (stage poc + /ticket)."
+  default     = "/poc/ticket"
 }
 
 variable "zone_id" {

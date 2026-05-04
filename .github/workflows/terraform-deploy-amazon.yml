@@ -126,7 +126,7 @@ jobs:
             terraform apply -input=false -auto-approve -no-color
           fi
 
-      # Mismo bucket que el estado remoto de Terraform (secret STATE_S3_BUCKET). Prefijo carpeta opcional: STATE_S3_PREFIX.
+      # Bucket: secret STATE_S3_BUCKET (ej. softnet-configs). Carpeta: secret STATE_S3_PREFIX o, si vacío, demo-tickets-infra/ (como en infra/main.tf).
       - name: Publish Cognito and API summary to S3
         if: env.HAS_AWS_CREDS == 'true'
         working-directory: ${{ env.TF_DIR }}
@@ -140,6 +140,7 @@ jobs:
             exit 0
           fi
           API_URL=$(terraform output -raw api_gateway_url)
+          INVOKE_URL=$(terraform output -raw api_gateway_invoke_url)
           POOL_ID=$(terraform output -raw cognito_user_pool_id)
           CLIENT_ID=$(terraform output -raw cognito_client_id)
           IDP_URL=$(terraform output -raw cognito_idp_endpoint)
@@ -153,16 +154,17 @@ jobs:
             echo ""
             echo "aws_region=${AWS_REG}"
             echo "api_gateway_url=${API_URL}"
+            echo "api_gateway_invoke_url=${INVOKE_URL}"
             echo "cognito_user_pool_id=${POOL_ID}"
             echo "cognito_client_id=${CLIENT_ID}"
             echo "cognito_idp_endpoint=${IDP_URL}"
           } > "${OUT_FILE}"
-          KEY="tickets-cognito-api-latest.txt"
           P="${SUMMARY_S3_PREFIX:-}"
           P="${P#/}"
           P="${P%/}"
-          if [ -n "$P" ]; then
-            KEY="${P}/${KEY}"
+          if [ -z "$P" ]; then
+            P="demo-tickets-infra"
           fi
+          KEY="${P}/tickets-cognito-api-latest.txt"
           aws s3 cp "${OUT_FILE}" "s3://${SUMMARY_S3_BUCKET}/${KEY}" --content-type text/plain
           echo "Uploaded s3://${SUMMARY_S3_BUCKET}/${KEY}"
