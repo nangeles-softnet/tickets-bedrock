@@ -63,11 +63,17 @@ jobs:
         if: env.HAS_AWS_CREDS == 'true'
         working-directory: ${{ env.TF_DIR }}
         run: |
+          set -euo pipefail
           if [ -f envs_poc.tfvars ] && [ -s envs_poc.tfvars ]; then
-            terraform apply -target=aws_ecr_repository.support_agent -var-file=envs_poc.tfvars -input=false -auto-approve -no-color
+            VARFILE=(-var-file=envs_poc.tfvars)
           else
-            terraform apply -target=aws_ecr_repository.support_agent -input=false -auto-approve -no-color
+            VARFILE=()
           fi
+          # Si el repo ya existe en la cuenta pero no está en tfstate, importar evita RepositoryAlreadyExistsException.
+          if ! terraform state show aws_ecr_repository.support_agent >/dev/null 2>&1; then
+            terraform import "${VARFILE[@]}" aws_ecr_repository.support_agent tickets-support-agent || true
+          fi
+          terraform apply -target=aws_ecr_repository.support_agent "${VARFILE[@]}" -input=false -auto-approve -no-color
 
       - name: Get ECR repository URL
         if: env.HAS_AWS_CREDS == 'true'
