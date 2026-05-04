@@ -117,13 +117,17 @@ jobs:
 
       # Mismo bucket que el estado remoto de Terraform (secret STATE_S3_BUCKET). Prefijo carpeta opcional: STATE_S3_PREFIX.
       - name: Publish Cognito and API summary to S3
-        if: env.HAS_AWS_CREDS == 'true' && secrets.STATE_S3_BUCKET != ''
+        if: env.HAS_AWS_CREDS == 'true'
         working-directory: ${{ env.TF_DIR }}
         env:
           SUMMARY_S3_BUCKET: ${{ secrets.STATE_S3_BUCKET }}
           SUMMARY_S3_PREFIX: ${{ secrets.STATE_S3_PREFIX }}
         run: |
           set -euo pipefail
+          if [ -z "${SUMMARY_S3_BUCKET:-}" ]; then
+            echo "Skipping S3 summary: set repository secret STATE_S3_BUCKET to enable upload."
+            exit 0
+          fi
           API_URL=$(terraform output -raw api_gateway_url)
           POOL_ID=$(terraform output -raw cognito_user_pool_id)
           CLIENT_ID=$(terraform output -raw cognito_client_id)
