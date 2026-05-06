@@ -5,6 +5,9 @@ Makefile
 *.tfstate
 .terraform*
 .terraform.*
+.env
+.node_modules
+.package-lock.json
 
 frontend/node_modules
 github_deploy_policy.json
